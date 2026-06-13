@@ -11,10 +11,10 @@ import (
 
 type IconHandler struct {
 	svc service.IconService
-	cfg config.IconConfig
+	cfg config.Config
 }
 
-func NewIconHandler(svc service.IconService, cfg config.IconConfig) *IconHandler {
+func NewIconHandler(svc service.IconService, cfg config.Config) *IconHandler {
 	return &IconHandler{
 		svc: svc,
 		cfg: cfg,
@@ -23,6 +23,13 @@ func NewIconHandler(svc service.IconService, cfg config.IconConfig) *IconHandler
 
 func (h *IconHandler) GetAll(c *gin.Context) {
 	all := h.svc.GetAll(c)
+	c.Header(
+		"Cache-Control",
+		fmt.Sprintf(
+			"public, max-age=%v, immutable",
+			h.cfg.Http.CacheControlDay*24*60*60,
+		),
+	)
 	c.JSON(http.StatusOK, all)
 }
 
@@ -46,11 +53,11 @@ func (h *IconHandler) GetIcon(c *gin.Context) {
 	height := icon.Height
 
 	if width <= 0 {
-		width = h.cfg.DefaultSize
+		width = h.cfg.Icon.DefaultSize
 	}
 
 	if height <= 0 {
-		height = h.cfg.DefaultSize
+		height = h.cfg.Icon.DefaultSize
 	}
 
 	if icon.Height == -1 {
@@ -63,5 +70,12 @@ func (h *IconHandler) GetIcon(c *gin.Context) {
 
 	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %v %v">%s</svg>`, width, height, icon.Body)
 
+	c.Header(
+		"Cache-Control",
+		fmt.Sprintf(
+			"public, max-age=%v, immutable",
+			h.cfg.Http.CacheControlDay*24*60*60,
+		),
+	)
 	c.Data(200, "image/svg+xml; charset=utf-8", []byte(svg))
 }

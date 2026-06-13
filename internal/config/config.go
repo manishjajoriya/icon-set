@@ -16,7 +16,8 @@ type Config struct {
 }
 
 type HttpConfig struct {
-	Port string `env:"HTTP_PORT" env-required:"true"`
+	Port            string `env:"HTTP_PORT" env-required:"true"`
+	CacheControlDay int    `env:"CACHE_CONTROL_DAY" env-required:"true"`
 }
 
 type IconConfig struct {

@@ -30,7 +30,7 @@ func (a *app) Init() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	iconService := service.NewIconService(a.icons)
-	iconHandler := handler.NewIconHandler(iconService, a.cfg.Icon)
+	iconHandler := handler.NewIconHandler(iconService, *a.cfg)
 
 	v1 := r.Group("/api/v1")
 	{
