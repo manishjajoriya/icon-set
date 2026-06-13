@@ -1,0 +1,16 @@
+{
+  "allowed_icon_pack": [
+    "catppuccin.json",
+    "cryptocurrency-color.json",
+    "devicon.json",
+    "flag.json",
+    "flat-color-icons.json",
+    "glyphs-poly.json",
+    "logos.json",
+    "material-icon-theme.json",
+    "noto.json",
+    "openmoji.json",
+    "skill-icons.json",
+    "streamline-freehand-color.json"
+  ]
+}
