@@ -40,6 +40,7 @@ func MustLoad() *Config {
 	err := cleanenv.ReadEnv(cfg)
 
 	if err == nil {
+		loadAllowedIconPack(cfg)
 		return cfg
 	}
 
@@ -65,23 +66,28 @@ func MustLoad() *Config {
 		log.Fatal().Err(err).Msg("error reading config")
 	}
 
-	if cfg.Icon.AllowedIconPackPath != "" {
-		if _, err := os.Stat(cfg.Icon.AllowedIconPackPath); os.IsNotExist(err) {
-			log.Fatal().Msg("allowed icon pack does not exist")
-		}
-		data, err := os.ReadFile(cfg.Icon.AllowedIconPackPath)
-		if err != nil {
-			log.Fatal().Err(err).Msg("error reading allowed icon pack")
-		}
-
-		var al allowedIconPack
-
-		if err := json.Unmarshal(data, &al); err != nil {
-			log.Fatal().Err(err).Msg("error unmarshaling allowed icon pack")
-		}
-
-		cfg.Icon.AllowedIconPack = al.AllowedIconPack
-	}
+	log.Info().
+		Str("path", cfg.Icon.AllowedIconPackPath).
+		Msg("loading allowed icon packs")
+	loadAllowedIconPack(cfg)
 
 	return cfg
+}
+
+func loadAllowedIconPack(cfg *Config) {
+	if cfg.Icon.AllowedIconPackPath == "" {
+		return
+	}
+
+	data, err := os.ReadFile(cfg.Icon.AllowedIconPackPath)
+	if err != nil {
+		log.Fatal().Err(err).Msg("error reading allowed icon pack")
+	}
+
+	var al allowedIconPack
+	if err := json.Unmarshal(data, &al); err != nil {
+		log.Fatal().Err(err).Msg("error unmarshaling allowed icon pack")
+	}
+
+	cfg.Icon.AllowedIconPack = al.AllowedIconPack
 }

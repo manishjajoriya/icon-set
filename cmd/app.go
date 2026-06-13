@@ -59,8 +59,8 @@ func (a *app) Init() *gin.Engine {
 }
 
 func (a *app) Run(r *gin.Engine) {
-	log.Info().Msgf("Running server on port 3333")
-	err := r.Run(":3333")
+	log.Info().Msgf("Running server on port %v", a.cfg.Http.Port)
+	err := r.Run(":" + a.cfg.Http.Port)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}

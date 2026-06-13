@@ -1,0 +1,3 @@
+./internal/assets/*.json
+.env
+docker-compose.yaml

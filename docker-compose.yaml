@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: IconSetApi
+    restart: no
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+    env_file:
+      - path: .env
+        required: true
