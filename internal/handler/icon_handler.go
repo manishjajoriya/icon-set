@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/manishjajoriya/icon-set/internal/config"
 	"github.com/manishjajoriya/icon-set/internal/service"
+	"github.com/manishjajoriya/icon-set/internal/util"
+	"github.com/rs/zerolog/log"
 )
 
 type IconHandler struct {
@@ -33,6 +35,16 @@ func (h *IconHandler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, all)
 }
 
+func (h *IconHandler) GetSorted(c *gin.Context) {
+	res, err := util.LoadIconList(&h.cfg)
+	if err != nil {
+		log.Err(err).Msg("IconHandler GetSorted")
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
+
 func (h *IconHandler) SearchIcon(c *gin.Context) {
 	query := c.Query("query")
 	svg := h.svc.SearchIcon(c, query)
@@ -52,20 +64,12 @@ func (h *IconHandler) GetIcon(c *gin.Context) {
 	width := icon.Width
 	height := icon.Height
 
-	if width <= 0 {
+	if width == -1 {
 		width = h.cfg.Icon.DefaultSize
 	}
 
-	if height <= 0 {
+	if height == -1 {
 		height = h.cfg.Icon.DefaultSize
-	}
-
-	if icon.Height == -1 {
-		height = width
-	}
-
-	if icon.Width == -1 {
-		width = height
 	}
 
 	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %v %v">%s</svg>`, width, height, icon.Body)

@@ -8,9 +8,6 @@
     "glyphs-poly.json",
     "logos.json",
     "material-icon-theme.json",
-    "noto.json",
-    "openmoji.json",
-    "skill-icons.json",
-    "streamline-freehand-color.json"
+    "skill-icons.json"
   ]
 }

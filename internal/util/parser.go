@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/manishjajoriya/icon-set/internal/config"
+	"github.com/manishjajoriya/icon-set/internal/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,7 +33,8 @@ type Icon struct {
 }
 
 type InfoStruct struct {
-	Palette bool `json:"palette"`
+	Palette bool    `json:"palette"`
+	Height  float32 `json:"height"`
 }
 
 type iconifyFile struct {
@@ -42,8 +44,9 @@ type iconifyFile struct {
 		Width  float32 `json:"width"`
 		Height float32 `json:"height"`
 	} `json:"icons"`
-	Height float32    `json:"height"`
 	Info   InfoStruct `json:"info"`
+	Height float32    `json:"height"`
+	Width  float32    `json:"width"`
 }
 
 func LoadIcons(cfg *config.Config) (map[string]Icon, error) {
@@ -83,20 +86,31 @@ func LoadIcons(cfg *config.Config) (map[string]Icon, error) {
 		for name, icon := range collection.Icons {
 			key := collection.Prefix + ":" + name
 
-			var height float32
-			if icon.Height != 0 {
-				height = icon.Height
-			} else if collection.Height != 0 {
-				height = collection.Height
-			} else {
-				height = -1
+			width := icon.Width
+			height := icon.Height
+
+			if width == 0 {
+				width = collection.Width
 			}
 
-			var width float32
-			if icon.Width != 0 {
-				width = icon.Width
-			} else {
+			if height == 0 {
+				height = collection.Height
+			}
+
+			if width == 0 && height != 0 {
+				width = height
+			}
+
+			if height == 0 && width != 0 {
+				height = width
+			}
+
+			if width == 0 {
 				width = -1
+			}
+
+			if height == 0 {
+				height = -1
 			}
 
 			icons[key] = Icon{
@@ -145,6 +159,53 @@ func LoadMultiColorIcons() (map[string]Icon, error) {
 	log.Info().Int("length", len(icons)).Msg("loaded multicolor icons")
 	log.Info().Int("icon pack length", len(colors)).Msg("loaded multicolor icons")
 	log.Info().Any("icon pack", colors).Msg("loaded multicolor icons")
+
+	return icons, nil
+}
+
+func LoadIconList(cfg *config.Config) ([]types.SearchResponse, error) {
+	files, err := filepath.Glob(cfg.Icon.IconJsonPath)
+	if err != nil {
+		return nil, err
+	}
+
+	icons := make([]types.SearchResponse, 0)
+
+	for _, file := range files {
+		if cfg.Icon.OnlyMultiColor {
+			if !slices.Contains(colorIconPack, filepath.Base(file)) {
+				continue
+			}
+		}
+
+		if len(cfg.Icon.AllowedIconPack) != 0 {
+			if !slices.Contains(cfg.Icon.AllowedIconPack, filepath.Base(file)) {
+				continue
+			}
+		}
+
+		log.Info().Str("file", filepath.Base(file)).Msg("loading icon")
+
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+
+		var collection iconifyFile
+		if err := json.Unmarshal(data, &collection); err != nil {
+			return nil, err
+		}
+
+		for name := range collection.Icons {
+			icons = append(icons, types.SearchResponse{
+				Key:    collection.Prefix + ":" + name,
+				Name:   name,
+				Prefix: collection.Prefix,
+			})
+		}
+	}
+
+	log.Info().Int("length", len(icons)).Msg("loaded icon list")
 
 	return icons, nil
 }

@@ -51,6 +51,7 @@ func (a *app) Init() *gin.Engine {
 
 		})
 		v1.GET("/all", iconHandler.GetAll)
+		v1.GET("/sort-all", iconHandler.GetSorted)
 		v1.GET("/search", iconHandler.SearchIcon)
 		v1.GET("/icon/:key", iconHandler.GetIcon)
 	}
